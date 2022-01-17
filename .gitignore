@@ -2,3 +2,5 @@ data
 .DS_Store
 bin/.DS_Store
 bin/cache
+bin/__pycache__
+
