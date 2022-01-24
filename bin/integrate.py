@@ -34,7 +34,7 @@ sc.tl.umap(adata)
 
 
 sc.pl.umap(
-    adata, color=["sample_id"], palette=sc.pl.palettes.default_20
+    adata, color=["batch"], palette=sc.pl.palettes.default_20
 )
 print(adata.obsm["X_pca"])
 

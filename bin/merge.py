@@ -37,16 +37,6 @@ for sample in os.listdir(input_path):
         print(tmp)
         # Fetch sample metadata
         tmp.obs["sample_id"] = sample.split(".")[0]
-        """
-        m = meta[meta['sample_id'] == sample]
-        print(meta)
-        
-        # Add metadata to adata
-        for col in m.columns:
-            print(m.columns)
-            print(m[col].values)
-            tmp.obs[col] = m[col].values[0]
-        """    
     
         # Append
         adata.append(tmp)
