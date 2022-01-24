@@ -121,33 +121,24 @@ def create_filtered_adata_files():
 
             adata_filtered_human = adata[:, human_mask_filtered]
             adata_filtered_mouse = adata[:, mouse_mask_filtered]
+            # print(new_indices)# .index)
+            adata_filtered_mouse.var.index = (pd.Index(gen.split("mm10___")[1] for gen in adata_filtered_mouse.var.index.values))
+            # print([gen.split("mm10___")[1] for gen in adata_filtered_mouse.var.gene_ids.values])
+            adata_filtered_mouse.var.gene_ids = pd.Index([gen.split("mm10___")[1] for gen in adata_filtered_mouse.var.gene_ids.values])
+
             filter_cells_genes(adata_filtered_human, sample_id, "human")
             filter_cells_genes(adata_filtered_mouse, sample_id, "mouse")
+    
         else:
             filter_cells_genes(adata, sample_id)
+        
             
 
         
 
 
-def get_processed_sample_from_adata_file(sample_id):
-    """Given samples id get filtered adata object
 
-    This function takes sample id as input and returns the filtered AnnData object
-
-    Args:
-        sample_id (str): the name of the folder where the sample files stored
-    
-    Returns:
-        Filtered AnnData object of the sample
-
-    """
-    row = meta[meta["sample_id"]==sample_id]
-    condition = str(row["condition"].values[0])
-    adata = sc.read(os.path.join(out_data_path, f"{sample_id}_{condition}_filtered.h5ad"))
-
-    return adata
-
+"""
 
 def analyze_pdx_samples(sample_id):
 
@@ -190,7 +181,7 @@ def analyze_pdx_samples(sample_id):
 
     fig.savefig(os.path.join(plot_path, "preprocess", f"human_vs_mouse_violin_plot.png") , dpi=300)
     
-
+"""
 def separate_pdx_samples():
 
     fig, axs = plt.subplots(1, 3, figsize=(15, 4))
@@ -234,18 +225,20 @@ def separate_pdx_samples():
 
 
 
-    """print(adata_raw)
-    print(adata_raw_mouse)
-    print(adata_raw_human)
+def get_processed_sample_from_adata_file(sample_id):
+    """Given samples id get filtered adata object
 
-    print(adata_filtered)
-    print(adata_filtered_mouse)
-    print(adata_filtered_human)
+    This function takes sample id as input and returns the filtered AnnData object
 
-    sns.lineplot(data=flights_wide["May"])"""
+    Args:
+        sample_id (str): the name of the folder where the sample files stored
+    
+    Returns:
+        Filtered AnnData object of the sample
 
+    """
+    row = meta[meta["sample_id"]==sample_id]
+    condition = str(row["condition"].values[0])
+    adata = sc.read(os.path.join(out_data_path, f"{sample_id}_{condition}_filtered.h5ad"))
 
-
-
-
-    # adata_mouse = adata[:, adata.obs.var_names.str.startswith]
+    return adata
