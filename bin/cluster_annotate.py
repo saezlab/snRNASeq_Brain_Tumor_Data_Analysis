@@ -9,7 +9,7 @@ import os
 
 # Read integrated object
 # Read command line and set args
-parser = argparse.ArgumentParser(prog='qc', description='Run Cluster and annotation')
+parser = argparse.ArgumentParser(prog='qc', description='Run Clustering and annotation')
 parser.add_argument('-i', '--input_path', help='Input path to merged object', required=True)
 parser.add_argument('-o', '--output_dir', help='Output directory where to store the object', required=True)
 args = vars(parser.parse_args())

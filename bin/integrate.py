@@ -19,14 +19,8 @@ output_path = args['output_dir']
 
 # Read merged object
 adata = sc.read_h5ad(input_path)
-print(adata.obs["batch"])
-print(adata.obsm["X_pca"])
 # Run harmony
 sce.pp.harmony_integrate(adata, 'batch', adjusted_basis='X_pca', max_iter_harmony=30)
-
-print(adata.obsm)
-
-
 
 # Run umap with updated connectivity
 sc.pp.neighbors(adata)
@@ -36,7 +30,6 @@ sc.tl.umap(adata)
 sc.pl.umap(
     adata, color=["batch"], palette=sc.pl.palettes.default_20
 )
-print(adata.obsm["X_pca"])
 
 # Write to file
 adata.write(os.path.join(output_path, 'integrated.h5ad'))

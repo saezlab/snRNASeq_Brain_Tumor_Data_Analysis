@@ -9,11 +9,11 @@ import os
 import argparse
 
 '''
-Open all samples QC processed files, concatenate them and run integration
+Open all samples QC processed files, merge them
 '''
 
 # Read command line and set args
-parser = argparse.ArgumentParser(prog='qc', description='Run QC per sample')
+parser = argparse.ArgumentParser(prog='qc', description='Run Merging')
 parser.add_argument('-i', '--input_dir', help='Input directory containing all sample directories', required=True)
 parser.add_argument('-o', '--output_dir', help='Output directory where to store the processed object', required=True)
 args = vars(parser.parse_args())
@@ -45,6 +45,7 @@ for sample in os.listdir(input_path):
 # Merge objects and delete list
 adata = adata[0].concatenate(adata[1:], join='outer')
 
+
 # Log-normalize expression
 sc.pp.normalize_total(adata)
 sc.pp.log1p(adata)
@@ -55,7 +56,7 @@ sc.pl.highly_variable_genes(adata)
 
 adata.var = adata.var[['highly_variable','highly_variable_nbatches']]
 adata.raw = adata
-print(adata)
+
 
 # Filter by HVG
 num_hvg_genes = 3000
@@ -82,9 +83,9 @@ sc.tl.pca(adata, svd_solver='arpack')
 sc.pp.neighbors(adata)
 sc.tl.umap(adata)
 
-sc.pl.umap(
+"""sc.pl.umap(
     adata, color=["sample_id"], palette=sc.pl.palettes.default_20
-)
+)"""
 
 # Write to file
 adata.write(os.path.join(output_path, 'merged.h5ad'))

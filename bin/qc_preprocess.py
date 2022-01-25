@@ -48,9 +48,9 @@ def filter_cells_genes(adata, sample_id, pdx_prefix=""):
     mt_thr = 20
     gene_qnt = 0.99
 
-    
     if pdx_prefix!="":
         condition = f"{condition}_{pdx_prefix}"
+    
     # calculate qc metrics
     # adata.var["MT"] = 
     adata.var["MT"] = adata.var_names.str.contains("MT-")
@@ -108,7 +108,8 @@ def filter_cells_genes(adata, sample_id, pdx_prefix=""):
     return adata
 
 def create_filtered_adata_files():
-    for ind, row in meta.iterrows():
+
+    for _, row in meta.iterrows():
     
         sample_id = row["sample_id"]
         condition = row["condition"]
@@ -122,7 +123,7 @@ def create_filtered_adata_files():
             adata_filtered_human = adata[:, human_mask_filtered]
             adata_filtered_mouse = adata[:, mouse_mask_filtered]
             # print(new_indices)# .index)
-            adata_filtered_mouse.var.index = (pd.Index(gen.split("mm10___")[1] for gen in adata_filtered_mouse.var.index.values))
+            adata_filtered_mouse.var.index = pd.Index(gen.split("mm10___")[1] for gen in adata_filtered_mouse.var.index.values)
             # print([gen.split("mm10___")[1] for gen in adata_filtered_mouse.var.gene_ids.values])
             adata_filtered_mouse.var.gene_ids = pd.Index([gen.split("mm10___")[1] for gen in adata_filtered_mouse.var.gene_ids.values])
 
