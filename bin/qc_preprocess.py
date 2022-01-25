@@ -123,14 +123,16 @@ def create_filtered_adata_files():
             adata_filtered_human = adata[:, human_mask_filtered]
             adata_filtered_mouse = adata[:, mouse_mask_filtered]
             # print(new_indices)# .index)
-            adata_filtered_mouse.var.index = pd.Index(gen.split("mm10___")[1] for gen in adata_filtered_mouse.var.index.values)
+            adata_filtered_mouse.var.index = pd.Index(gen.split("mm10___")[1].upper() for gen in adata_filtered_mouse.var.index.values)
             # print([gen.split("mm10___")[1] for gen in adata_filtered_mouse.var.gene_ids.values])
-            adata_filtered_mouse.var.gene_ids = pd.Index([gen.split("mm10___")[1] for gen in adata_filtered_mouse.var.gene_ids.values])
+            adata_filtered_mouse.var.gene_ids = pd.Index([gen.split("mm10___")[1].upper() for gen in adata_filtered_mouse.var.gene_ids.values])
 
             filter_cells_genes(adata_filtered_human, sample_id, "human")
             filter_cells_genes(adata_filtered_mouse, sample_id, "mouse")
     
         else:
+            adata.var.index = pd.Index(gen.upper() for gen in adata.var.index.values)
+            adata.var.gene_ids = pd.Index([gen.upper() for gen in adata.var.gene_ids.values])
             filter_cells_genes(adata, sample_id)
         
             

@@ -19,22 +19,27 @@ output_path = args['output_dir']
 ###############################
 
 adata = sc.read_h5ad(input_path)
-print(adata.raw)
+
 
 sc.pp.neighbors(adata)
 sc.tl.leiden(adata)
-print(adata.raw)
+
 
 sc.tl.rank_genes_groups(adata, 'leiden', method='wilcoxon')
 sc.pl.rank_genes_groups(adata)
-print(adata.raw)
-sc.pl.umap(
+
+"""sc.pl.umap(
     adata, color=["leiden", "sample_id"], palette=sc.pl.palettes.default_20
-)
+)"""
 
 adata = adata.raw.to_adata()
 df_markers = pd.read_csv("../data/Stroma_oldclusters_DEgenes_Venice_top100xlsx.csv", sep=";")
 marker_genes = []
+
+# adata_filtered_mouse.var.index = pd.Index(gen.split("mm10___")[1] for gen in adata_filtered_mouse.var.index.values)
+# print([gen.split("mm10___")[1] for gen in adata_filtered_mouse.var.gene_ids.values])
+for item in adata.var.index.values:
+    print(item)
 
 for ind, row in df_markers.iterrows():
 
@@ -44,11 +49,11 @@ for ind, row in df_markers.iterrows():
 
 marker_genes = pd.DataFrame(marker_genes, columns=['gene', 'cell_type']) 
 marker_genes['weight'] = 1
-print(marker_genes)
+# print(marker_genes)
 
 dc.run_ora(adata, marker_genes, min_n=0, source='cell_type', target='gene', weight='weight')
 
-print(adata)
+# print(adata)
 
 tmp = dc.get_acts(adata, obsm_key='ora_estimate')
 print(adata.obsm)
