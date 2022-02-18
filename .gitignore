@@ -3,4 +3,5 @@ data
 bin/.DS_Store
 bin/cache
 bin/__pycache__
+bin/figures
 

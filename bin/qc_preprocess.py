@@ -97,7 +97,10 @@ def filter_cells_genes(adata, sample_id, pdx_prefix=""):
     adata = adata[adata.obs.doublet_score < doublet_thr, : ]
     adata = adata[adata.obs.n_genes_by_counts < gene_thr, : ]
     post_filter_shape = np.shape(adata.X)
-    adata.obs["batch"] = sample_id
+    # Assume they are coming from the same barch
+    adata.obs["batch"] = 0
+    adata.obs["condition"] = condition
+    print(condition)
     print(f"{sample_id}:\nAnnData shape before filtering {pre_filter_shape}")
     print(f"AnnData shape after filtering {post_filter_shape}")
     del adata.obs["predicted_doublet"]
