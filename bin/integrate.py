@@ -41,4 +41,4 @@ sc.pl.umap(
 adata.write(os.path.join(output_path, f'{sample_type}_integrated.h5ad'))
 
 #  python integrate.py -i ../data/out_data/mouse_merged.h5ad -o ../data/out_data -st mouse
-#  python integrate.py -i ../data/out_data/tumor_merged.h5ad -o ../data/out_data -st tumor
+#  python integrate.py -i ../data/out_data/human_merged.h5ad -o ../data/out_data -st human

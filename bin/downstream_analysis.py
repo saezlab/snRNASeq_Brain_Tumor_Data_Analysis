@@ -29,7 +29,8 @@ sc.settings.figdir = plot_path
 # Read merged object
 adata = sc.read_h5ad(input_path)
 
-model = dc.get_progeny(organism='mouse', top=500)
+organism = sample_type
+model = dc.get_progeny(organism=sample_type, top=500)
 
 model['target'] = model['target'].str.upper()
 
@@ -65,3 +66,4 @@ plt.clf()
 
 
 # python downstream_analysis.py -i ../data/out_data/mouse_integrated.h5ad -o ../data/out_data -st mouse
+# python downstream_analysis.py -i ../data/out_data/human_integrated.h5ad -o ../data/out_data -st human

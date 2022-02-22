@@ -36,13 +36,17 @@ sc.tl.rank_genes_groups(adata, 'leiden', method='wilcoxon')
 # sc.pl.rank_genes_groups(adata)
 
 sc.pl.umap(
-    adata, color=["leiden", "sample_id"], palette=sc.pl.palettes.default_20, show=False, save=f'{sample_type}_clusters_samples'
+    adata, color=["leiden"], palette=sc.pl.palettes.default_20, show=False, save=f'{sample_type}_clusters'
 )
 
+sc.pl.umap(
+    adata, color=["sample_id"], palette=sc.pl.palettes.default_20, show=False, save=f'{sample_type}_samples'
+)
 
 marker_genes = None
-own_markers = False
-marker_db=""
+own_markers = True
+marker_db="PanglaoDB"
+
 if own_markers:
     # adata = adata.raw.to_adata()
     df_markers = pd.read_csv("../data/Stroma_oldclusters_DEgenes_Venice_top100xlsx.csv", sep=";")
@@ -65,13 +69,16 @@ else:
     marker_genes = dc.get_resource('PanglaoDB')
     marker_db="PanglaoDB"
     # Filter by canonical_marker and human
-    marker_genes = marker_genes[(marker_genes['mouse']=='True')&(marker_genes['canonical_marker']=='True')]
+    marker_genes = marker_genes[(marker_genes['human']=='True')&(marker_genes['canonical_marker']=='True')]
 
     # Remove duplicated entries
     marker_genes = marker_genes[~marker_genes.duplicated(['cell_type', 'genesymbol'])]
 
+print(marker_genes)
 
-dc.run_ora(mat=adata, net=marker_genes, source='cell_type', target='genesymbol', min_n=0)
+marker_genes['genesymbol'] = marker_genes['genesymbol'].str.upper()
+
+dc.run_ora(mat=adata, net=marker_genes, source='cell_type', target='genesymbol', min_n=3)
 
 # print(adata)
 # dc.run_ora(mat=adata, net=markers, source='cell_type', target='genesymbol', min_n=3, verbose=True)
@@ -84,13 +91,15 @@ print("============= ora_estimate ============= ")
 print(adata.obsm["ora_estimate"])
 
 mean_enr = dc.summarize_acts(acts, groupby='leiden')
-
+print(mean_enr)
 sns.clustermap(mean_enr, xticklabels=mean_enr.columns)
+
 #fig = swarm_plot.get_figure()
 plt.savefig(f"{plot_path}/{sample_type}_clustermap" if own_markers else f"{plot_path}/{sample_type}_clustermap_{marker_db}") 
 
 
 annotation_dict = dc.assign_groups(mean_enr)
+
 
 
 # Add cell type column based on annotation
@@ -101,9 +110,9 @@ sc.pl.umap(adata, color='cell_type', show=False, save=f'{sample_type}_cell_type'
 
 # sc.pl.umap(tmp, color=list(tmp.var.index)+['leiden']+['sample_id'],  show=False, save=f"{sample_type}_cell_type")
 
-# Write to file
+# Write to file
 adata.write(os.path.join(output_path, f'{sample_type}_integrated.h5ad'))
 
 
 # python cluster_annotate.py -i ../data/out_data/mouse_integrated.h5ad -o ../data/out_data -st mouse
-# python cluster_annotate.py -i ../data/out_data/tumor_integrated.h5ad -o ../data/out_data -st tumor
+# python cluster_annotate.py -i ../data/out_data/human_integrated.h5ad -o ../data/out_data -st human

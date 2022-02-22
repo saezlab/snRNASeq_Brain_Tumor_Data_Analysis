@@ -35,7 +35,7 @@ print(samples)
 
 adata = []
 for sample in os.listdir(input_path):
-    if sample_type in sample and "sample05" not in sample:
+    if sample_type=="mouse" and sample_type in sample and "sample05" not in sample:
         # Read adata
         print(sample)
         tmp = sc.read_h5ad(os.path.join(input_path, sample))
@@ -44,6 +44,14 @@ for sample in os.listdir(input_path):
         tmp.obs["sample_id"] = sample.split(".")[0]
     
         # Append
+        adata.append(tmp)
+        del tmp
+    
+    elif sample_type=="human" and (sample_type in sample or "tumor" in sample) and "sample01" not in sample:
+        print(sample)
+        tmp = sc.read_h5ad(os.path.join(input_path, sample))
+        print(tmp)
+        tmp.obs["sample_id"] = sample.split(".")[0]
         adata.append(tmp)
         del tmp
     
@@ -109,4 +117,4 @@ adata.write(os.path.join(output_path, f'{sample_type}_merged.h5ad'))
 
 
 # python merge.py -i ../data/out_data -o ../data/out_data  -st mouse
-# python merge.py -i ../data/out_data -o ../data/out_data  -st tumor
+# python merge.py -i ../data/out_data -o ../data/out_data  -st human
