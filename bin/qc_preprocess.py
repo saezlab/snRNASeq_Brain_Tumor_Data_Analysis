@@ -44,6 +44,7 @@ def filter_cells_genes(adata, sample_id, pdx_prefix=""):
     
     pre_filter_shape = np.shape(adata.X)
 
+
     doublet_thr = 0.2
     mt_thr = 20
     gene_qnt = 0.99
@@ -97,7 +98,7 @@ def filter_cells_genes(adata, sample_id, pdx_prefix=""):
     adata = adata[adata.obs.doublet_score < doublet_thr, : ]
     adata = adata[adata.obs.n_genes_by_counts < gene_thr, : ]
     post_filter_shape = np.shape(adata.X)
-    # Assume they are coming from the same barch
+    # Assume they are coming from the same batch
     adata.obs["batch"] = 0
     adata.obs["condition"] = condition
     print(condition)
@@ -117,6 +118,7 @@ def create_filtered_adata_files():
         sample_id = row["sample_id"]
         condition = row["condition"]
         adata = utils.read_raw_sample(condition)
+    
         print(sample_id, condition)
         if "pdx" in condition:
             

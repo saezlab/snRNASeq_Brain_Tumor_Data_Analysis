@@ -30,7 +30,7 @@ sc.settings.figdir = plot_path
 adata = sc.read_h5ad(input_path)
 
 organism = sample_type
-model = dc.get_progeny(organism=sample_type, top=500)
+model = dc.get_progeny(organism=sample_type, top=100)
 
 model['target'] = model['target'].str.upper()
 
@@ -45,13 +45,13 @@ print(adata.obsm['mlm_estimate'])
 acts = dc.get_acts(adata, obsm_key='mlm_estimate')
 acts
 
-sc.pl.umap(acts, color=list(set(model["source"]))+["sample_id", "leiden"], vcenter=0, cmap='coolwarm', save=f"{sample_type}_umap_progeny")
+sc.pl.umap(acts, color=list(set(model["source"]))+["sample_id", "leiden"], vcenter=0, cmap='coolwarm', save=f"{sample_type}_umap_progeny100")
 
 
 mean_acts_cluster = dc.summarize_acts(acts, groupby='leiden', min_std=0)
 
 ax = sns.clustermap(mean_acts_cluster, xticklabels=mean_acts_cluster.columns, vmin=-2, vmax=2, cmap='coolwarm',)
-ax.savefig(f"{plot_path}/{sample_type}_clustermap_cluster_progeny", dpi=300)
+ax.savefig(f"{plot_path}/{sample_type}_clustermap_cluster_progeny100", dpi=300)
 plt.clf()
 
 
@@ -59,7 +59,7 @@ plt.clf()
 mean_acts_sampid = dc.summarize_acts(acts, groupby='sample_id', min_std=0)
 
 ax = sns.clustermap(mean_acts_sampid, xticklabels=mean_acts_sampid.columns, vmin=-2, vmax=2, cmap='coolwarm',)
-ax.savefig(f"{plot_path}/{sample_type}_clustermap_sample_id_progeny", dpi=300)
+ax.savefig(f"{plot_path}/{sample_type}_clustermap_sample_id_progeny100", dpi=300)
 plt.clf()
 
 

@@ -35,7 +35,7 @@ print(samples)
 
 adata = []
 for sample in os.listdir(input_path):
-    if sample_type=="mouse" and sample_type in sample and "sample05" not in sample:
+    if sample_type=="mouse" and sample_type in sample and "sample05" not in sample  and "integrated" not in sample and "merged" not in sample:
         # Read adata
         print(sample)
         tmp = sc.read_h5ad(os.path.join(input_path, sample))
@@ -102,18 +102,42 @@ sc.pp.scale(adata)
 # ax = sns.heatmap(adata.X)
 # plt.show()
 
-sc.tl.pca(adata, svd_solver='arpack')
+sc.tl.pca(adata, svd_solver='arpack', random_state=0)
+
+
+# Get loadings for each gene for each PC
+df_loadings = pd.DataFrame(adata.varm['PCs'], index=adata.var_names)
+# get rank of each loading for each PC
+df_rankings = pd.DataFrame((-1 * df_loadings.values).argsort(0).argsort(0), index=df_loadings.index, columns=df_loadings.columns)
+# c.f. with df_loadings.apply(scipy.stats.rankdata, axis=0)
+# evaluate 
+print("Top loadings for PC1...")
+print(df_loadings[0].sort_values().tail())
+print("Rank of IKZF1 for first 5 PCs...")
+print(df_rankings.loc["IKZF1"].head())
+
+
+
+
+sc.pl.pca_overview(adata, color='sample_id', show=False, save=f'{sample_type}_pca_overview.pdf')
+
+sc.pl.pca_loadings(adata, components=[1,2,3,4,5,6,7,8],  show=False, save=f'{sample_type}_pca_loadings.pdf')
+
+sc.pl.pca_variance_ratio(adata, n_pcs = 50,  show=False, save=f'{sample_type}_variance_ratio.pdf')
+
+
+
 
 # Run UMAP
 sc.pp.neighbors(adata)
 sc.tl.umap(adata)
-
+"""
 sc.pl.umap(
     adata, color=["condition"], palette=sc.pl.palettes.default_20, show=False, save=f'{sample_type}_merged_condition.pdf'
 )
 
 # Write to file
-adata.write(os.path.join(output_path, f'{sample_type}_merged.h5ad'))
+adata.write(os.path.join(output_path, f'{sample_type}_merged.h5ad'))"""
 
 
 # python merge.py -i ../data/out_data -o ../data/out_data  -st mouse
