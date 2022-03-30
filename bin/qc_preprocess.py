@@ -5,6 +5,7 @@ import numpy as np
 import scanpy as sc
 import pandas as pd
 import seaborn as sns
+from pathlib import Path
 import matplotlib.pyplot as plt
 import scanpy.external as sce
 from anndata._core.anndata import AnnData
@@ -17,7 +18,10 @@ sc.settings.verbosity = 0
 
 data_path = "../data/b06x-g/G703/eblanco/projects/Aniello_ITCC-P4/results/count_matrices_to_share/snRNAseq/6.1.0"
 out_data_path="../data/out_data/"
-plot_path="../plots/"
+Path(out_data_path).mkdir(parents=True, exist_ok=True)
+plot_path="../plots/qc_preprocess"
+Path(plot_path).mkdir(parents=True, exist_ok=True)
+sc.settings.figdir = plot_path
 
 meta = utils.get_meta_data()
 
@@ -82,7 +86,7 @@ def filter_cells_genes(adata, sample_id, pdx_prefix=""):
     sns.distplot(adata.obs["n_genes_by_counts"], kde=False, bins=60, ax=axs[1][2])
     sns.distplot(adata.obs["n_genes_by_counts"][adata.obs["n_genes_by_counts"] < 4000], kde=False, bins=60, ax=axs[1][3])
     
-    fig.savefig(os.path.join(plot_path, "preprocess", f"basic_stats_before_filtering_{condition}.png"), dpi=300)
+    fig.savefig(os.path.join(plot_path, f"basic_stats_before_filtering_{condition}.png"), dpi=300)
 
     
     
@@ -131,6 +135,10 @@ def create_filtered_adata_files():
             adata_filtered_mouse.var.index = pd.Index(gen.split("mm10___")[1].upper() for gen in adata_filtered_mouse.var.index.values)
             # print([gen.split("mm10___")[1] for gen in adata_filtered_mouse.var.gene_ids.values])
             adata_filtered_mouse.var.gene_ids = pd.Index([gen.split("mm10___")[1].upper() for gen in adata_filtered_mouse.var.gene_ids.values])
+        
+            adata_filtered_human.var.index = pd.Index(gen.split("GRCh38_")[1].upper() for gen in adata_filtered_human.var.index.values)
+            # print([gen.split("mm10___")[1] for gen in adata_filtered_mouse.var.gene_ids.values])
+            adata_filtered_human.var.gene_ids = pd.Index([gen.split("GRCh38_")[1].upper() for gen in adata_filtered_human.var.gene_ids.values])
 
             filter_cells_genes(adata_filtered_human, sample_id, "human")
             filter_cells_genes(adata_filtered_mouse, sample_id, "mouse")
@@ -141,13 +149,6 @@ def create_filtered_adata_files():
             filter_cells_genes(adata, sample_id)
         
             
-
-        
-
-
-
-"""
-
 def analyze_pdx_samples(sample_id):
 
     fig, axs = plt.subplots(1, 3, figsize=(15, 4))
@@ -187,9 +188,8 @@ def analyze_pdx_samples(sample_id):
         
         sns.violinplot(data=df, ax=axs[ind], title=condition)
 
-    fig.savefig(os.path.join(plot_path, "preprocess", f"human_vs_mouse_violin_plot.png") , dpi=300)
+    fig.savefig(os.path.join(plot_path, f"human_vs_mouse_violin_plot.png") , dpi=300)
     
-"""
 def separate_pdx_samples():
 
     fig, axs = plt.subplots(1, 3, figsize=(15, 4))
@@ -229,7 +229,7 @@ def separate_pdx_samples():
         
         sns.violinplot(data=df, ax=axs[ind], title=condition)
 
-    fig.savefig(os.path.join(plot_path, "preprocess", f"human_vs_mouse_violin_plot.png") , dpi=300)
+    fig.savefig(os.path.join(plot_path, f"human_vs_mouse_violin_plot.png") , dpi=300)
 
 
 
@@ -250,3 +250,10 @@ def get_processed_sample_from_adata_file(sample_id):
     adata = sc.read(os.path.join(out_data_path, f"{sample_id}_{condition}_filtered.h5ad"))
 
     return adata
+
+
+
+if __name__ == "__main__":
+    meta = utils.get_meta_data()
+
+    create_filtered_adata_files()

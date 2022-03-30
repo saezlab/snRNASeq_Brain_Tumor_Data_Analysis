@@ -1,4 +1,5 @@
 from reprlib import aRepr
+from pathlib import Path
 import scanpy as sc
 import scanpy.external as sce
 import numpy as np
@@ -20,7 +21,8 @@ output_path = args['output_dir']
 sample_type = args["sample_type"]
 ###############################
 
-plot_path="../plots/"
+plot_path="../plots/integrate"
+Path(plot_path).mkdir(parents=True, exist_ok=True)
 sc.settings.figdir = plot_path
 
 
