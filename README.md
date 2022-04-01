@@ -5,13 +5,13 @@ Analysis of single nucleus-RNAseq Brain Dataset - Stefan Pfister
 
 ## The analysis pipeline
 
-The analysis pipeline is explained below. The scripts are located under ```bin``` folder. After running each script, the relevant plots are created under ```plots``` folder. The ```out_data``` folder mentioned below is available in the following link:
+The analysis pipeline is explained below. The scripts are located under ```bin``` folder. After running each script, the relevant plots are created under ```plots``` folder. The ```out_data``` folder (the AnnData objects that you asked) mentioned below is available in the following link:
 
 https://drive.google.com/drive/folders/1fKj4oA9kTr7WQDy0lTDm6KhA5pKx0Dd7?usp=sharing
 
-The ```out_data``` folder should be located under ```data``` folder to reproduce the results. To order of scripts and brief explanations are available below:
+The ```out_data``` folder should be located under ```data``` folder to reproduce the results. The order of executions and brief explanations about the scripts are available below:
 
-- ```qc_preprocess``` applies preprocessing and filtering steps on each sample individually. The raw data (count matrices) should be located under data folder as ```data/b06x-g/G703/eblanco/projects/Aniello_ITCC-P4/results/count_matrices_to_share/snRNAseq/6.1.0```. This scripts saves the resulting AnnData objects under ```data/out_data``` folder (e.g. ```data/out_data/sample01_B062_007+pdx01-x_human_filtered.h5ad```). The script first seperates PDX samples into two as human and mouse samples and applies QC and filtering on the samples. The script can be run as follows:
+- ```qc_preprocess``` applies preprocessing and filtering steps on each sample individually. Before running the script, the raw data (count matrices) should be located under data folder as ```data/b06x-g/G703/eblanco/projects/Aniello_ITCC-P4/results/count_matrices_to_share/snRNAseq/6.1.0```. This scripts saves the resulting AnnData objects under ```data/out_data``` folder (e.g. ```data/out_data/sample01_B062_007+pdx01-x_human_filtered.h5ad```). The script first seperates PDX samples into two as human and mouse samples and applies QC and filtering on the samples. The script can be run as follows:
 
 ```
     python qc_preprocess.py
