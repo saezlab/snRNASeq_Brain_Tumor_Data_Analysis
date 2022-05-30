@@ -95,7 +95,7 @@ def filter_cells_genes(adata, sample_id, pdx_prefix=""):
     plt.axvline(100, 0, min_g, linestyle='--', color="black")
     plt.axvline(200, 0, min_g, linestyle='--', color="black")
     plt.axvline(300, 0, min_g, linestyle='--', color="black")
-    fig.savefig(os.path.join(plot_path, f"basic_stats_before_filtering_{condition}.png"), dpi=300)
+    fig.savefig(os.path.join(plot_path, f"basic_stats_before_filtering_{condition}.png"), dpi=80)
 
     print(f"====================== {condition} ====================== ")
     print(f"AnnData shape before any filtering: {np.shape(adata.X)}")
