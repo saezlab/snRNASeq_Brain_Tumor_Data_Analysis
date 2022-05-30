@@ -7,7 +7,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from pathlib import Path
-
+import sys
 import os
 import argparse
 
@@ -38,9 +38,10 @@ print(samples)
 # put the samples in a list
 adata = []
 for sample in os.listdir(input_path):
-    if sample_type=="mouse" and sample_type in sample and "sample05" not in sample  and "integrated" not in sample and "merged" not in sample:
+    if sample_type=="mouse" and sample_type in sample and "sample05" not in sample  and "integrated" not in sample and "merged" not in sample and sample.endswith("h5ad"):
         # Read adata
         print(sample)
+        print(input_path, sample)
         tmp = sc.read_h5ad(os.path.join(input_path, sample))
         print(tmp)
         # Fetch sample metadata
@@ -50,7 +51,7 @@ for sample in os.listdir(input_path):
         adata.append(tmp)
         del tmp
     
-    elif sample_type=="human" and (sample_type in sample or "tumor" in sample) and "sample01" not in sample:
+    elif sample_type=="human" and (sample_type in sample or "tumor" in sample) and "sample01" not in sample  and "integrated" not in sample and "merged" not in sample and sample.endswith("h5ad"):
         print(sample)
         tmp = sc.read_h5ad(os.path.join(input_path, sample))
         print(tmp)
@@ -62,22 +63,25 @@ for sample in os.listdir(input_path):
 adata = adata[0].concatenate(adata[1:], join='outer')
 
 
+# keep raw counts in layers
+adata.layers['raw_counts'] = adata.X.copy()
+adata.layers["normalized"] = sc.pp.normalize_total(adata, target_sum=1e6, inplace=False)['X'].copy()
+sc.pp.log1p(adata, layer="normalized")
+
 # Log-normalize expression
 sc.pp.normalize_total(adata, target_sum=1e6)
 sc.pp.log1p(adata)
 
-
-
-
+# Log-normalize expression
+sc.pp.normalize_total(adata, target_sum=1e6)
+sc.pp.log1p(adata)
 
 # Compute HVG
 sc.pp.highly_variable_genes(adata, batch_key='batch')
 sc.pl.highly_variable_genes(adata, show=False, save=f'{sample_type}_merged_hvg.pdf')
 
-
 adata.var = adata.var[['highly_variable','highly_variable_nbatches']]
 adata.raw = adata
-
 
 # Filter by HVG
 num_hvg_genes = 3000
@@ -95,8 +99,6 @@ for ind in adata.var["MT"].index:
 
 # Update QC metrics
 sc.pp.calculate_qc_metrics(adata, qc_vars=['mt'], percent_top=None, log1p=False, inplace=True)
-
-
 
 # Run PCA
 sc.pp.scale(adata)
@@ -132,6 +134,14 @@ sc.pp.neighbors(adata)
 sc.tl.umap(adata)
 sc.pl.umap(adata, color=["condition"], palette=sc.pl.palettes.default_20, show=False, save=f'{sample_type}_merged_condition.pdf')
 
+"""print("================== RAW COUNTS ================== ")
+print(adata.layers['raw_counts'])
+print("================== CPM NORMALIZED ================== ")
+print(adata.layers["normalized"])
+print("==========LOG1p=============")
+print(adata.layers["normalized"])
+print("================== RAW COUNTS - 2 ================== ")
+print(adata.layers['raw_counts'])"""
 
 # Write to file
 adata.write(os.path.join(output_path, f'{sample_type}_merged.h5ad'))

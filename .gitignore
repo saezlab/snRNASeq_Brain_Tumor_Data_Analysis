@@ -9,4 +9,5 @@ bin/__pycache__
 bin/figures
 documents
 bin/.ipynb_checkpoints
-
+data/
+plots/plots*

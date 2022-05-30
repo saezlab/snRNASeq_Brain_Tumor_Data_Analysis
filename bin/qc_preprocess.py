@@ -13,7 +13,9 @@ from utils import out_data_path, plot_path, data_path
 import os
 import argparse
 import plotting
+import warnings
 
+warnings.simplefilter("ignore")
 sc.settings.verbosity = 0
 
 data_path = "../data/b06x-g/G703/eblanco/projects/Aniello_ITCC-P4/results/count_matrices_to_share/snRNAseq/6.1.0"
@@ -51,7 +53,9 @@ def filter_cells_genes(adata, sample_id, pdx_prefix=""):
 
     doublet_thr = 0.2
     mt_thr = 20
-    gene_qnt = 0.99
+    min_g = 200
+    # This was 0.99 in the first results. 
+    gene_qnt = 0.995
 
     if pdx_prefix!="":
         condition = f"{condition}_{pdx_prefix}"
@@ -82,32 +86,49 @@ def filter_cells_genes(adata, sample_id, pdx_prefix=""):
     
     plotting.plot_doublet_scores(adata, axs[0][3], doublet_thr=doublet_thr, fontsize=11)
     sns.distplot(adata.obs["total_counts"], kde=False, ax=axs[1][0])
-    sns.distplot(adata.obs["total_counts"][adata.obs["total_counts"] < 10000], kde=False, bins=40, ax=axs[1][1])
-    sns.distplot(adata.obs["n_genes_by_counts"], kde=False, bins=60, ax=axs[1][2])
-    sns.distplot(adata.obs["n_genes_by_counts"][adata.obs["n_genes_by_counts"] < 4000], kde=False, bins=60, ax=axs[1][3])
+    sns.distplot(adata.obs["total_counts"][adata.obs["total_counts"] < 10000], kde=False, bins=100, ax=axs[1][1])
     
+    sns.distplot(adata.obs["n_genes_by_counts"], kde=False, bins=100, ax=axs[1][2])
+
+    sns.distplot(adata.obs["n_genes_by_counts"][adata.obs["n_genes_by_counts"] < 1000], kde=False, bins=100, ax=axs[1][3])
+    plt.axvline(50, 0, min_g, linestyle='--', color="black")
+    plt.axvline(100, 0, min_g, linestyle='--', color="black")
+    plt.axvline(200, 0, min_g, linestyle='--', color="black")
+    plt.axvline(300, 0, min_g, linestyle='--', color="black")
     fig.savefig(os.path.join(plot_path, f"basic_stats_before_filtering_{condition}.png"), dpi=300)
 
-    
-    
+    print(f"====================== {condition} ====================== ")
+    print(f"AnnData shape before any filtering: {np.shape(adata.X)}")
+    # print(np.shape(adata.X))
     # adata.obs.doublet_score < doublet_thr
     # number og genes at each change it to 300 
-    sc.pp.filter_cells(adata, min_genes=300)
+    sc.pp.filter_cells(adata, min_genes=min_g)
+    print(f"AnnData shape after filtering cells with threshold {min_g}: {np.shape(adata.X)}")
+    
 
     # drop this to three
     sc.pp.filter_genes(adata, min_cells=3)
+    # print(f"AnnData after shape filter genes: {condition}")
+    # print(np.shape(adata.X))
     # filter based on total counts
     gene_thr = np.quantile(adata.obs.n_genes_by_counts, gene_qnt)
     adata = adata[adata.obs.pct_counts_mt < mt_thr, :]
+    # print(f"AnnData after shape filter cells: {condition}")
+    # print(np.shape(adata.X))
+
     adata = adata[adata.obs.doublet_score < doublet_thr, : ]
+    # print(f"AnnData after doublet: {condition}")
+    # print(np.shape(adata.X))
     adata = adata[adata.obs.n_genes_by_counts < gene_thr, : ]
+    # print(f"AnnData after n_genes_by_counts: {condition}")
+    # print(np.shape(adata.X))
     post_filter_shape = np.shape(adata.X)
     # Assume they are coming from the same batch
     adata.obs["batch"] = 0
     adata.obs["condition"] = condition
     print(condition)
     print(f"{sample_id}:\nAnnData shape before filtering {pre_filter_shape}")
-    print(f"AnnData shape after filtering {post_filter_shape}")
+    print(f"AnnData shape after all filtering {post_filter_shape}")
     del adata.obs["predicted_doublet"]
     adata.write(os.path.join(out_data_path, f"{sample_id}_{condition}_filtered.h5ad"))
     # print(os.path.join(out_data_path, f"{sample_id}_{condition}_filtered.h5ad"))

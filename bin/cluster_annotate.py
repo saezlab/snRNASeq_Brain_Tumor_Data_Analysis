@@ -10,6 +10,8 @@ import numpy as np
 import argparse
 import os
 
+import sys
+
 
 # Read integrated object
 # Read command line and set args
@@ -164,9 +166,26 @@ else:
 
 
 # sc.pl.umap(tmp, color=list(tmp.var.index)+['leiden']+['sample_id'],  show=False, save=f"{sample_type}_cell_type")
+print("================ RAW COUNT LAYERS================")
+print(adata.layers["raw_counts"])
+print("================ adata.X================")
+print(adata.X)
+adata.X = adata.layers["raw_counts"].copy()
+print("================ AFTER adata.X================")
+print(adata.X)
+
+adata_withraw = adata.copy()
+adata_withraw.X = adata_withraw.layers["raw_counts"].copy()
+adata_withlog1pnormalized = adata.copy()
+adata_withlog1pnormalized.X = adata_withlog1pnormalized.layers["normalized"].copy()
 
 # Write to file
-adata.write(os.path.join(output_path, f'{sample_type}_integrated.h5ad'))
+adata_withraw.write(os.path.join(output_path, f'{sample_type}_integrated_clustered_raw.h5ad'))
+# Write to file
+adata_withlog1pnormalized.write(os.path.join(output_path, f'{sample_type}_integrated_clustered_log1pnormalized.h5ad'))
+
+# Write to file
+adata.write(os.path.join(output_path, f'{sample_type}_integrated_clustered.h5ad'))
 
 
 # python cluster_annotate.py -i ../data/out_data/mouse_integrated.h5ad -o ../data/out_data -st mouse
