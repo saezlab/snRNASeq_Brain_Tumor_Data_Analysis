@@ -28,11 +28,36 @@ plot_path="../plots/downstream"
 Path(plot_path).mkdir(parents=True, exist_ok=True)
 sc.settings.figdir = plot_path
 
-
-leiden_res_params = [0.1, 0.2, 0.5, 0.7, 1.0]
-
 # Read merged object
 adata = sc.read_h5ad(input_path)
+
+organism = sample_type
+model = dc.get_progeny(organism=sample_type, top=500)
+
+model['target'] = model['target'].str.upper()
+
+net = dc.get_dorothea(organism=sample_type, levels=['A','B','C'])
+net
+
+dc.run_mlm(mat=adata, net=net, source='source', target='target', weight='weight', verbose=True)
+
+print(adata.obsm['mlm_estimate'])
+
+acts = dc.get_acts(adata, obsm_key='mlm_estimate')
+acts
+
+mean_acts = dc.summarize_acts(acts, groupby='final_annotation', min_std=0.75)
+mean_acts
+
+sns.clustermap(mean_acts, xticklabels=mean_acts.columns, vmin=-5, vmax=5, cmap='coolwarm')
+plt.show()
+
+
+sc.pl.umap(acts, color=['AHR', "GATA2", "GATA3", "FOXA1", "FOXP1", "SOX2", "AHR", "ZFX", 'final_annotation'], cmap='coolwarm', vcenter=0)
+plt.show()
+"""leiden_res_params = [0.1, 0.2, 0.5, 0.7, 1.0]
+
+
 
 organism = sample_type
 model = dc.get_progeny(organism=sample_type, top=100)
@@ -43,7 +68,7 @@ print(model)
 
 dc.run_mlm(mat=adata, net=model, source='source', target='target', weight='weight', verbose=True)
 
-print(adata.obsm['mlm_estimate'])
+print(adata.obsm['mlm_estimate'])"""
 
 """
 pathway_list = list(set(model["source"]))
@@ -51,7 +76,7 @@ pathway_list = list(set(model["source"]))
 for path in pathway_list:
     adata.obs[path] = adata.obsm['mlm_estimate'][path]
 """
-acts = dc.get_acts(adata, obsm_key='mlm_estimate')
+"""acts = dc.get_acts(adata, obsm_key='mlm_estimate')
 print(acts)
 
 
@@ -73,7 +98,7 @@ for l_param in leiden_res_params:
 
 
 acts.write(os.path.join(output_path, f'{sample_type}_integrated_progeny_act.h5ad'))
-acts.write(os.path.join(output_path, f'{sample_type}_integrated_progeny_act.h5ad'))
+acts.write(os.path.join(output_path, f'{sample_type}_integrated_progeny_act.h5ad'))"""
 
 # python downstream_analysis.py -i ../data/out_data/mouse_integrated.h5ad -o ../data/out_data -st mouse
 # python downstream_analysis.py -i ../data/out_data/human_integrated.h5ad -o ../data/out_data -st human
