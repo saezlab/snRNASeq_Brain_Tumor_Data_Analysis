@@ -84,6 +84,16 @@ for (val in sample_name_list)
 }
 
 
+
+
+"""malignant_B062_007+pdx01-x_human
+malignant_B062_007+tumor01
+malignant_B062_013+pdx01-x_human
+malignant_B062_013+tumor01
+malignant_B062_025+pdx01-x_human
+malignant_B062_025+tumor01"""
+
+
 library(tidyverse)
 library(magrittr)
 library(liana)
@@ -101,14 +111,6 @@ liana_aggregate()
 dplyr::glimpse(liana_test)
 
 
-"""malignant_B062_007+pdx01-x_human
-malignant_B062_007+tumor01
-malignant_B062_013+pdx01-x_human
-malignant_B062_013+tumor01
-malignant_B062_025+pdx01-x_human
-malignant_B062_025+tumor01"""
-
-
 malignant_groups <- c("malignant_B062_007+pdx01-x_human", 
 "malignant_B062_007+tumor01",
 "malignant_B062_013+pdx01-x_human",
@@ -118,11 +120,29 @@ malignant_groups <- c("malignant_B062_007+pdx01-x_human",
 
 c_types  = c("myeloid", "oligodendrocytes", "stromal", "lymphoid")
 
+print(val)
+liana_test %>%
+dplyr::filter(source %in% c_types) %>%
+dplyr::filter(target %in% malignant_groups) %>%
+mutate(aggregate_rank = p.adjust(aggregate_rank, method="BH")) %>%
+filter(aggregate_rank <= 0.02) %>%
+liana_dotplot(source_groups = c_types,
+target_groups = malignant_groups)+
+theme(strip.text = element_text(size = 10, face="bold", colour = "gray6"), 
+axis.text.x = element_text(size = 10, angle = 45, vjust = 0.5, hjust=0.5), 
+axis.text.y = element_text(size = 10, vjust = 0.5, hjust=0.5))+ 
+scale_x_discrete(breaks=malignant_groups,
+labels=c("007+pdx01-x", "007+tumor01","013+pdx01-x","013+tumor01","025+pdx01-x","025+tumor01"))
+ggsave(paste0("../../plots/ccc/integrated/source-all_targets-malignant_group.pdf"))
+
+
+
 for (val in c_types)
 {
     print(val)
     liana_test %>%
     dplyr::filter(source ==val) %>%
+    dplyr::filter(target %in% malignant_groups) %>%
     dplyr::top_n(25, desc(aggregate_rank)) %>%
     liana_dotplot(source_groups = c(val),
     target_groups = malignant_groups)+
@@ -133,8 +153,6 @@ for (val in c_types)
     labels=c("007+pdx01-x", "007+tumor01","013+pdx01-x","013+tumor01","025+pdx01-x","025+tumor01"))
     ggsave(paste0("../../plots/ccc/integrated/source-", val, "_targets-malignant_group.pdf"))
 }
-
-
 
 
 for (val in malignant_groups)
@@ -182,8 +200,9 @@ gojo_meta <- load("Gojo_SS2_Seurat_metadata.RData")
 gojo_meta <- meta
 gojo_ss2_data$final_annotation <- gojo_meta$final_annotation
 gojo_ss2_data %>% dplyr::glimpse()
-gojo_ss2_liana <- liana_wrap(gojo_ss2_data, idents_col = "final_annotation")
-
+gojo_ss2_liana <- liana_wrap(gojo_ss2_  data, idents_col = "final_annotation")
+gojo_ss2_data[, gojo_ss2_data@meta.data$final_annotation %in% c("Myeloid", "")]
+gojo_ss2_data@meta.data$final_annotation%>%as.factor()
 gojo_ss2_liana <- gojo_ss2_liana %>%
 liana_aggregate()
 
