@@ -90,58 +90,143 @@ library(liana)
 show_resources()
 show_methods()
 setwd("Google Drive/Projects/saezlab/snRNASeq_Brain_Tumor_Data_Analysis/data/aniello_processed_objects/")
-testdata <- readRDS(file ="human_Seurat_final_annotation.RData")
 testdata <- load("human_Seurat_final_annotation.RData")
 testdata %>% dplyr::glimpse()
 testdata <- sce.m
-testdata %>% dplyr::glimpse()
-liana_test <- liana_wrap(testdata)
-liana_test <- liana_wrap(testdata,idents_col = "final_annotation")
+liana_test <- liana_wrap(testdata, idents_col = "final_annotation")
+
 liana_test <- liana_test %>%
 liana_aggregate()
+
 dplyr::glimpse(liana_test)
-liana_test %>%
-dplyr::filter(source =="B") %>%
-dplyr::top_n(25, desc(aggregate_rank))
-sce.m$final_annotation
-sce.m$final_annotation
-liana_test$source
-liana_test %>%
-dplyr::filter(source =="B") %>%
-dplyr::top_n(25, desc(aggregate_rank)) %>%
-liana_dotplot(source_groups = c("malignant_B062_007+pdx01-x_human"),
-target_groups = c("stromal", "myeloid T", "oligodendrocytes"))
-liana_test %>%
-dplyr::filter(source =="malignant_B062_007+pdx01-x_human") %>%
-dplyr::top_n(25, desc(aggregate_rank)) %>%
-liana_dotplot(source_groups = c("malignant_B062_007+pdx01-x_human"),
-target_groups = c("stromal", "myeloid T", "oligodendrocytes"))
-liana_test %>%
-dplyr::filter(source =="malignant_B062_007+tumor01") %>%
-dplyr::top_n(25, desc(aggregate_rank)) %>%
-liana_dotplot(source_groups = c("malignant_B062_007+tumor01"),
-target_groups = c("stromal", "myeloid T", "oligodendrocytes"))
-liana_test %>%
-dplyr::filter(source =="malignant_B062_007+tumor01") %>%
-dplyr::top_n(25, desc(aggregate_rank)) %>%
-liana_dotplot(source_groups = c("malignant_B062_007+tumor01"),
-target_groups = c("stromal", "myeloid Q", "oligodendrocytes"))
-liana_test
-liana_test
+
+
+"""malignant_B062_007+pdx01-x_human
+malignant_B062_007+tumor01
+malignant_B062_013+pdx01-x_human
+malignant_B062_013+tumor01
+malignant_B062_025+pdx01-x_human
+malignant_B062_025+tumor01"""
+
+
+malignant_groups <- c("malignant_B062_007+pdx01-x_human", 
+"malignant_B062_007+tumor01",
+"malignant_B062_013+pdx01-x_human",
+"malignant_B062_013+tumor01",
+"malignant_B062_025+pdx01-x_human",
+"malignant_B062_025+tumor01")
+
+c_types  = c("myeloid", "oligodendrocytes", "stromal", "lymphoid")
+
+for (val in c_types)
+{
+    print(val)
+    liana_test %>%
+    dplyr::filter(source ==val) %>%
+    dplyr::top_n(25, desc(aggregate_rank)) %>%
+    liana_dotplot(source_groups = c(val),
+    target_groups = malignant_groups)+
+    theme(strip.text = element_text(size = 10, face="bold", colour = "gray6"), 
+    axis.text.x = element_text(size = 10, angle = 45, vjust = 0.5, hjust=0.5), 
+    axis.text.y = element_text(size = 10, vjust = 0.5, hjust=0.5))+ 
+    scale_x_discrete(breaks=malignant_groups,
+    labels=c("007+pdx01-x", "007+tumor01","013+pdx01-x","013+tumor01","025+pdx01-x","025+tumor01"))
+    ggsave(paste0("../../plots/ccc/integrated/source-", val, "_targets-malignant_group.pdf"))
+}
+
+
+
+
+for (val in malignant_groups)
+{
+    print(val)
+    liana_test %>%
+    dplyr::filter(source ==val) %>%
+    dplyr::top_n(25, desc(aggregate_rank)) %>%
+    liana_dotplot(source_groups = c(val),
+    target_groups = c_types)+
+    theme(strip.text = element_text(size = 10, colour = "gray6"),
+    plot.title = element_text(size=4), 
+    axis.text.x = element_text(size = 10, angle = 45, vjust = 0.5, hjust=0.5), 
+    axis.text.y = element_text(size = 10, vjust = 0.5, hjust=0.5))
+    ggsave(paste0("../../plots/ccc/integrated/source-", val, "_targets-mye_oli_stro_lymp.pdf"))
+}
+
+
+
+
 liana_test %>%
 dplyr::filter(source =="malignant_B062_007+pdx01-x_human") %>%
 dplyr::top_n(25, desc(aggregate_rank)) %>%
 liana_dotplot(source_groups = c("malignant_B062_007+pdx01-x_human"),
 target_groups = c("stromal", "myeloid", "oligodendrocytes"))
+
 liana_test %>%
 dplyr::filter(source =="malignant_B062_007+pdx01-x_human") %>%
 dplyr::top_n(100, desc(aggregate_rank)) %>%
 liana_dotplot(source_groups = c("malignant_B062_007+pdx01-x_human"),
 target_groups = c("stromal", "myeloid", "oligodendrocytes"))
+
 liana_trunc <- liana_test %>%
 # only keep interactions concordant between methods
 filter(aggregate_rank <= 0.01) # this can be FDR-corr if n is too high
 heat_freq(liana_trunc)
-history()
-savehistory("~/Desktop/Untitled.Rhistory")
+# history()
+# savehistory("~/Desktop/Untitled.Rhistory")
 
+
+
+gojo_ss2_data <- load("Gojo_SS2_Seurat.RData")
+gojo_ss2_data <- sce.m
+gojo_meta <- load("Gojo_SS2_Seurat_metadata.RData")
+gojo_meta <- meta
+gojo_ss2_data$final_annotation <- gojo_meta$final_annotation
+gojo_ss2_data %>% dplyr::glimpse()
+gojo_ss2_liana <- liana_wrap(gojo_ss2_data, idents_col = "final_annotation")
+
+gojo_ss2_liana <- gojo_ss2_liana %>%
+liana_aggregate()
+
+dplyr::glimpse(gojo_ss2_liana)
+
+
+"""
+“malignant_MUV006” and “myeloid”; 
+“malignant_MUV006” and “lymphoid; 
+“malignant_MUV006” and “stroma”.
+"""
+
+
+malignant_groups <- c("malignant_MUV006")
+
+c_types  = c("myeloid", "stromal", "lymphoid")
+
+for (val in c_types)
+{
+    print(val)
+    gojo_ss2_liana %>%
+    dplyr::filter(source ==val) %>%
+    dplyr::top_n(25, desc(aggregate_rank)) %>%
+    liana_dotplot(source_groups = c(val),
+    target_groups = malignant_groups)+
+    theme(strip.text = element_text(size = 10, face="bold", colour = "gray6"), 
+    axis.text.x = element_text(size = 10, angle = 45, vjust = 0.5, hjust=0.5), 
+    axis.text.y = element_text(size = 10, vjust = 0.5, hjust=0.5))
+    ggsave(paste0("../../plots/ccc/integrated/gojo_source-", val, "_targets-malignant_group.pdf"))
+}
+
+
+for (val in malignant_groups)
+{
+    print(val)
+    gojo_ss2_liana %>%
+    dplyr::filter(source ==val) %>%
+    dplyr::top_n(25, desc(aggregate_rank)) %>%
+    liana_dotplot(source_groups = c(val),
+    target_groups = c_types)+
+    theme(strip.text = element_text(size = 10, colour = "gray6"),
+    plot.title = element_text(size=4), 
+    axis.text.x = element_text(size = 10, angle = 45, vjust = 0.5, hjust=0.5), 
+    axis.text.y = element_text(size = 10, vjust = 0.5, hjust=0.5))
+    ggsave(paste0("../../plots/ccc/integrated/gojo_source-", val, "_targets-mye_oli_stro_lymp.pdf"))
+}

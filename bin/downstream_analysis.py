@@ -24,7 +24,7 @@ input_path = args['input_path']
 output_path = args['output_dir']
 sample_type = args['sample_type']
 
-plot_path="../plots/downstream"
+plot_path="../plots/downstream/TF"
 Path(plot_path).mkdir(parents=True, exist_ok=True)
 sc.settings.figdir = plot_path
 
@@ -49,12 +49,15 @@ acts
 mean_acts = dc.summarize_acts(acts, groupby='final_annotation', min_std=0.75)
 mean_acts
 
-sns.clustermap(mean_acts, xticklabels=mean_acts.columns, vmin=-5, vmax=5, cmap='coolwarm')
-plt.show()
+sns.clustermap(mean_acts, xticklabels=mean_acts.columns, figsize=(20, 10), vmin=-5, vmax=5, cmap='coolwarm', annot_kws={"size": 4})
+plt.savefig(f"{plot_path}/{sample_type}_dorothea_mean_activities.pdf")
+print(list(mean_acts.columns))
 
+sc.pl.umap(acts, color=list(mean_acts.columns)+['final_annotation'], show=False, cmap='coolwarm', vcenter=0, save=f"{sample_type}_umap_dorothea_all_TFs")
 
-sc.pl.umap(acts, color=['AHR', "GATA2", "GATA3", "FOXA1", "FOXP1", "SOX2", "AHR", "ZFX", 'final_annotation'], cmap='coolwarm', vcenter=0)
-plt.show()
+for tf in list(mean_acts.columns)+['final_annotation']:
+    sc.pl.umap(acts, color=tf, show=False, cmap='coolwarm', vcenter=0, save=f"{sample_type}_umap_dorothea_{tf}")
+
 """leiden_res_params = [0.1, 0.2, 0.5, 0.7, 1.0]
 
 
@@ -102,3 +105,4 @@ acts.write(os.path.join(output_path, f'{sample_type}_integrated_progeny_act.h5ad
 
 # python downstream_analysis.py -i ../data/out_data/mouse_integrated.h5ad -o ../data/out_data -st mouse
 # python downstream_analysis.py -i ../data/out_data/human_integrated.h5ad -o ../data/out_data -st human
+# python downstream_analysis.py -i ../data/aniello_processed_objects/sce.h5ad -o . -st human
