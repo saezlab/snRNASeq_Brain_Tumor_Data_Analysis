@@ -1,3 +1,5 @@
+
+
 import os
 import argparse
 import scanpy as sc
@@ -9,6 +11,7 @@ import scanpy.external as sce
 # Only needed for visualization:
 import matplotlib.pyplot as plt
 import seaborn as sns
+import sys
 
 
 
@@ -24,38 +27,58 @@ input_path = args['input_path']
 output_path = args['output_dir']
 sample_type = args['sample_type']
 
-plot_path="../plots/downstream/TF"
+sample_name = "prPDX_human"
+sample_name = "Riemondy_TME"
+plot_path = f"../plots/downstream/TF/{sample_name}"
+
 Path(plot_path).mkdir(parents=True, exist_ok=True)
 sc.settings.figdir = plot_path
 
 # Read merged object
 adata = sc.read_h5ad(input_path)
-
 organism = sample_type
-model = dc.get_progeny(organism=sample_type, top=500)
 
-model['target'] = model['target'].str.upper()
 
 net = dc.get_dorothea(organism=sample_type, levels=['A','B','C'])
-net
 
-dc.run_mlm(mat=adata, net=net, source='source', target='target', weight='weight', verbose=True)
+net['target'] = net['target'].str.upper()
 
-print(adata.obsm['mlm_estimate'])
+# dc.run_mlm(mat=adata, use_raw=False, net=net, source='source', target='target', weight='weight', verbose=True)
+if adata.raw:
+    dc.run_mlm(mat=adata, net=net, source='source', target='target', weight='weight', verbose=True)
+else:
+    # Assume raw matrix and perform normalization
+    print("Assume raw matrix and perform normalization...")
+    sc.pp.filter_genes(adata, min_cells=5)
+    sc.pp.normalize_total(adata, target_sum=1e4)
+    sc.pp.log1p(adata)
+    dc.run_mlm(mat=adata, use_raw=False, net=net, source='source', target='target', weight='weight', verbose=True)
+
+#  print(adata.obsm['mlm_estimate'])
 
 acts = dc.get_acts(adata, obsm_key='mlm_estimate')
-acts
+# print("Acts:")
+# print(acts)
 
-mean_acts = dc.summarize_acts(acts, groupby='final_annotation', min_std=0.75)
-mean_acts
 
-sns.clustermap(mean_acts, xticklabels=mean_acts.columns, figsize=(20, 10), vmin=-5, vmax=5, cmap='coolwarm', annot_kws={"size": 4})
-plt.savefig(f"{plot_path}/{sample_type}_dorothea_mean_activities.pdf")
-print(list(mean_acts.columns))
+meta_columns = ["TME_level_1", "TME_level_2", "TME_level_3", "final_annotation"]
 
-sc.pl.umap(acts, color=list(mean_acts.columns)+['final_annotation'], show=False, cmap='coolwarm', vcenter=0, save=f"{sample_type}_umap_dorothea_all_TFs")
+if sample_name=="prPDX_human":
+    meta_columns = ["TME_level_1", "TME_level_2", "final_annotation"]
+elif sample_name=="Riemondy_TME":
+    meta_columns = ["TME_level_1", "TME_level_2", "TME_level_3"]
 
-for tf in list(mean_acts.columns)+['final_annotation']:
+for col in meta_columns:
+    if col in adata.obs.columns:
+        mean_acts = dc.summarize_acts(acts, groupby=col, min_std=0.75)
+        # print("Mean acts:", mean_acts)
+        sns.clustermap(mean_acts, xticklabels=mean_acts.columns, figsize=(20, 10), vmin=-5, vmax=5, cmap='coolwarm', annot_kws={"size": 4})
+        plt.savefig(f"{plot_path}/{sample_type}_{col}_dorothea_mean_activities.pdf")
+
+
+sc.pl.umap(acts, color=list(mean_acts.columns)+meta_columns, show=False, cmap='coolwarm', vcenter=0, save=f"{sample_type}_umap_dorothea_all_TFs")
+
+for tf in list(mean_acts.columns)+meta_columns:
     sc.pl.umap(acts, color=tf, show=False, cmap='coolwarm', vcenter=0, save=f"{sample_type}_umap_dorothea_{tf}")
 
 """leiden_res_params = [0.1, 0.2, 0.5, 0.7, 1.0]
@@ -105,4 +128,6 @@ acts.write(os.path.join(output_path, f'{sample_type}_integrated_progeny_act.h5ad
 
 # python downstream_analysis.py -i ../data/out_data/mouse_integrated.h5ad -o ../data/out_data -st mouse
 # python downstream_analysis.py -i ../data/out_data/human_integrated.h5ad -o ../data/out_data -st human
-# python downstream_analysis.py -i ../data/aniello_processed_objects/sce.h5ad -o . -st human
+# python downstream_analysis.py -i ../data/aniello_processed_objects/sce_updated.h5ad -o . -st human
+# python downstream_analysis.py -i ../data/aniello_processed_objects/Gojo_SS2_updated.h5ad -o . -st human
+# python downstream_analysis.py -i ../data/aniello_processed_objects/Riemondy_TME.h5ad -o . -st human
