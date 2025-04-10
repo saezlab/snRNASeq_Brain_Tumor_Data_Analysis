@@ -1,6 +1,6 @@
 data/out_data
 data/b06x-g
-data/out_data/*
+data/out_data/* 
 data/b06x-g/*
 .DS_Store
 bin/.DS_Store
