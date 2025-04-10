@@ -11,8 +11,8 @@ setwd("../data/out_data")
 
 test = readH5AD("sample01_B062_007+pdx01-x_human_filtered.h5ad", verbose = TRUE)
 
-as.Seurat(test, counts = "X", data = NULL)
 
+as.Seurat(test, counts = "X", data = NULL)
 
 
 mouse_merged = readH5AD("mouse_merged.h5ad", verbose = TRUE)
