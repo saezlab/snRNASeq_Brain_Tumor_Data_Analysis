@@ -17,7 +17,7 @@ The ```out_data``` folder should be located under ```data``` folder to reproduce
     python qc_preprocess.py
 ```
 
-- ```merge.py``` merges the samples coming from mice (PDX+control) and human samples(PDX-tumor + tumor). It takes three arguments: *__(i)__* ```-i or --input_dir``` represents input directory containing the preprocessed AnnData object , *__(ii)__* ```-o or --output_dir``` argument representes the directory for the merged AnnData objects and *__(iii)__* ```-st or --sample_type``` argument represents the samples to be merged (i.e., human or mouse). Once the script is run the ```human_merged.h5ad``` or ```mouse_merged.h5ad``` files are created under the specified output folder (in this case ```../data/out_data```). This script can be run as follows:
+- ```merge.py``` merges the samples coming from mice (PDX+control) and human samples(PDX-tumor + tumor). It takes three arguments : *__(i)__* ```-i or --input_dir``` represents input directory containing the preprocessed AnnData object , *__(ii)__* ```-o or --output_dir``` argument representes the directory for the merged AnnData objects and *__(iii)__* ```-st or --sample_type``` argument represents the samples to be merged (i.e., human or mouse). Once the script is run the ```human_merged.h5ad``` or ```mouse_merged.h5ad``` files are created under the specified output folder (in this case ```../data/out_data```). This script can be run as follows:
 ```
     # mouse_merged.h5ad created
     python merge.py -i ../data/out_data -o ../data/out_data  -st mouse 
